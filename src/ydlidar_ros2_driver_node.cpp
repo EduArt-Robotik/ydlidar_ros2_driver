@@ -15,19 +15,13 @@
 
 #include "src/CYdLidar.h"
 #include <math.h>
-#include <chrono>
-#include <iostream>
 #include <memory>
 
-#include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp/time_source.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "std_srvs/srv/empty.hpp"
 #include <vector>
-#include <iostream>
 #include <string>
-#include <signal.h>
 
 #define ROS2Verision "1.0.1"
 
@@ -41,117 +35,117 @@ int main(int argc, char *argv[]) {
 
   CYdLidar laser;
   std::string str_optvalue = "/dev/ydlidar";
-  node->declare_parameter("port");
+  node->declare_parameter("port", "/dev/ydlidar");
   node->get_parameter("port", str_optvalue);
   ///lidar port
   laser.setlidaropt(LidarPropSerialPort, str_optvalue.c_str(), str_optvalue.size());
 
   ///ignore array
   str_optvalue = "";
-  node->declare_parameter("ignore_array");
+  node->declare_parameter("ignore_array", "");
   node->get_parameter("ignore_array", str_optvalue);
   laser.setlidaropt(LidarPropIgnoreArray, str_optvalue.c_str(), str_optvalue.size());
 
   std::string frame_id = "laser_frame";
-  node->declare_parameter("frame_id");
+  node->declare_parameter("frame_id", "laser_frame");
   node->get_parameter("frame_id", frame_id);
 
   //////////////////////int property/////////////////
   /// lidar baudrate
   int optval = 230400;
-  node->declare_parameter("baudrate");
+  node->declare_parameter("baudrate", 0);
   node->get_parameter("baudrate", optval);
   laser.setlidaropt(LidarPropSerialBaudrate, &optval, sizeof(int));
   /// tof lidar
   optval = TYPE_TRIANGLE;
-  node->declare_parameter("lidar_type");
+  node->declare_parameter("lidar_type", 0);
   node->get_parameter("lidar_type", optval);
   laser.setlidaropt(LidarPropLidarType, &optval, sizeof(int));
   /// device type
   optval = YDLIDAR_TYPE_SERIAL;
-  node->declare_parameter("device_type");
+  node->declare_parameter("device_type", 0);
   node->get_parameter("device_type", optval);
   laser.setlidaropt(LidarPropDeviceType, &optval, sizeof(int));
   /// sample rate
   optval = 9;
-  node->declare_parameter("sample_rate");
+  node->declare_parameter("sample_rate", 0);
   node->get_parameter("sample_rate", optval);
   laser.setlidaropt(LidarPropSampleRate, &optval, sizeof(int));
   /// abnormal count
   optval = 4;
-  node->declare_parameter("abnormal_check_count");
+  node->declare_parameter("abnormal_check_count", 0);
   node->get_parameter("abnormal_check_count", optval);
   laser.setlidaropt(LidarPropAbnormalCheckCount, &optval, sizeof(int));
 
   /// Intenstiy bit count
   optval = 8;
-  node->declare_parameter("intensity_bit");
+  node->declare_parameter("intensity_bit", 0);
   node->get_parameter("intensity_bit", optval);
   laser.setlidaropt(LidarPropIntenstiyBit, &optval, sizeof(int));
      
   //////////////////////bool property/////////////////
   /// fixed angle resolution
   bool b_optvalue = false;
-  node->declare_parameter("fixed_resolution");
+  node->declare_parameter("fixed_resolution", false);
   node->get_parameter("fixed_resolution", b_optvalue);
   laser.setlidaropt(LidarPropFixedResolution, &b_optvalue, sizeof(bool));
   /// rotate 180
   b_optvalue = true;
-  node->declare_parameter("reversion");
+  node->declare_parameter("reversion", true);
   node->get_parameter("reversion", b_optvalue);
   laser.setlidaropt(LidarPropReversion, &b_optvalue, sizeof(bool));
   /// Counterclockwise
   b_optvalue = true;
-  node->declare_parameter("inverted");
+  node->declare_parameter("inverted", true);
   node->get_parameter("inverted", b_optvalue);
   laser.setlidaropt(LidarPropInverted, &b_optvalue, sizeof(bool));
   b_optvalue = true;
-  node->declare_parameter("auto_reconnect");
+  node->declare_parameter("auto_reconnect", true);
   node->get_parameter("auto_reconnect", b_optvalue);
   laser.setlidaropt(LidarPropAutoReconnect, &b_optvalue, sizeof(bool));
   /// one-way communication
   b_optvalue = false;
-  node->declare_parameter("isSingleChannel");
+  node->declare_parameter("isSingleChannel", true);
   node->get_parameter("isSingleChannel", b_optvalue);
   laser.setlidaropt(LidarPropSingleChannel, &b_optvalue, sizeof(bool));
   /// intensity
   b_optvalue = false;
-  node->declare_parameter("intensity");
+  node->declare_parameter("intensity", true);
   node->get_parameter("intensity", b_optvalue);
   laser.setlidaropt(LidarPropIntenstiy, &b_optvalue, sizeof(bool));
   /// Motor DTR
   b_optvalue = false;
-  node->declare_parameter("support_motor_dtr");
+  node->declare_parameter("support_motor_dtr", false);
   node->get_parameter("support_motor_dtr", b_optvalue);
   laser.setlidaropt(LidarPropSupportMotorDtrCtrl, &b_optvalue, sizeof(bool));
 
   //////////////////////float property/////////////////
   /// unit: °
   float f_optvalue = 180.0f;
-  node->declare_parameter("angle_max");
+  node->declare_parameter("angle_max", 180.0f);
   node->get_parameter("angle_max", f_optvalue);
   laser.setlidaropt(LidarPropMaxAngle, &f_optvalue, sizeof(float));
   f_optvalue = -180.0f;
-  node->declare_parameter("angle_min");
+  node->declare_parameter("angle_min", -180.0f);
   node->get_parameter("angle_min", f_optvalue);
   laser.setlidaropt(LidarPropMinAngle, &f_optvalue, sizeof(float));
   /// unit: m
   f_optvalue = 64.f;
-  node->declare_parameter("range_max");
+  node->declare_parameter("range_max", 64.f);
   node->get_parameter("range_max", f_optvalue);
   laser.setlidaropt(LidarPropMaxRange, &f_optvalue, sizeof(float));
   f_optvalue = 0.1f;
-  node->declare_parameter("range_min");
+  node->declare_parameter("range_min", 0.1f);
   node->get_parameter("range_min", f_optvalue);
   laser.setlidaropt(LidarPropMinRange, &f_optvalue, sizeof(float));
   /// unit: Hz
   f_optvalue = 10.f;
-  node->declare_parameter("frequency");
+  node->declare_parameter("frequency", 10.f);
   node->get_parameter("frequency", f_optvalue);
   laser.setlidaropt(LidarPropScanFrequency, &f_optvalue, sizeof(float));
 
   bool invalid_range_is_inf = false;
-  node->declare_parameter("invalid_range_is_inf");
+  node->declare_parameter("invalid_range_is_inf", false);
   node->get_parameter("invalid_range_is_inf", invalid_range_is_inf);
 
 
@@ -237,3 +231,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+ 
